@@ -10,13 +10,13 @@ fun same_string(s1 : string, s2 : string) =
 fun all_except_option (str: string, str_list: string list) = 
     case str_list of
       [] => NONE
-    | x :: [] => if same_string(x,str)
+    (* | x :: [] => if same_string(x,str)
                  then SOME []
-                 else NONE
+                 else NONE *)
     | x :: xs => if same_string(x,str)
-                 then SOME (tl str_list)
+                 then SOME (xs)
                  else 
-                    case (all_except_option(str,tl str_list)) of
+                    case (all_except_option(str,xs)) of
                       NONE => NONE
                     | SOME l => SOME (x :: l)
 
@@ -26,14 +26,45 @@ val q1 = all_except_option("abc", ["ab","acb","abc"])
 fun  get_substitutions1(str_list_list: string list list, str: string)=
     case str_list_list of
       [] => []
-    | x_list:: xs_list => case all_except_option(str, x_list) of
-                      NONE => get_substitutions1(xs_list, str)
-                    | SOME l1 => l1@get_substitutions1(xs_list, str)
+    | x_list:: xs_list => 
+        case all_except_option(str, x_list) of
+          NONE => get_substitutions1(xs_list, str)
+        | SOME l1 => l1@get_substitutions1(xs_list, str)
 
 val q21 = get_substitutions1([["Fred","Fredrick"],["Elizabeth","Betty"],["Freddie","Fred","F"]],
 "Fred")
 val q22 = get_substitutions1([["Fred","Fredrick"],["Jeff","Jeffrey"],["Geoff","Jeff","Jeffrey"]],
 "Jeff")
+
+
+
+
+
+
+fun  get_substitutions_new(str_list_list: string list list, str: string)=
+    let 
+        fun help_fun(ans:string list, str_list_list:string list list)=
+            case str_list_list of
+              [] => ans
+            | x_list:: xs_list => 
+                case all_except_option(str, x_list) of
+                  NONE => help_fun(ans, xs_list)
+                | SOME l1 => help_fun(ans@l1, xs_list)
+        in
+            help_fun([], str_list_list)
+        end
+
+
+
+
+
+
+
+
+
+
+
+
 
 (* Write a function get_substitutions2, which is like get_substitutions1 except it uses a tail-recursive
 local helper function. *)
@@ -53,21 +84,25 @@ val q32 = get_substitutions1([["Fred","Fredrick"],["Jeff","Jeffrey"],["Geoff","J
 "Jeff")
 
 
-fun similar_names(str_list_list: string list list, full_name: {first:string,middle:string,last:string})=
+fun similar_names(str_list_list: string list list, {first=a,middle=b,last=c})=
     let 
-        val ret = get_substitutions2(str_list_list, #first full_name)
+        val ret = get_substitutions2(str_list_list, a)
         (* val substitutions = #first full_name :: ret *)
         fun gen_names(xs: string list, ans: {first:string,middle:string,last:string} list)=
             case xs of 
               [] => ans
-            | n:: names  => gen_names(names, ans@[{first=n, middle= #middle full_name, last= #last full_name}])
+            | n:: names  => gen_names(names, ans@[{first=n, middle= b, last= c}])
     in
         (* gen_names(substitutions, []) *)
-        gen_names(ret, [full_name])
+        gen_names(ret, [{first=a,middle=b,last=c}])
     end
 
-val q4 = similar_names([["Fred","Fredrick"],["Elizabeth","Betty"],["Freddie","Fred","F"]],
+val q41 = similar_names([["Fred","Fredrick"],["Elizabeth","Betty"],["Freddie","Fred","F"]],
 {first="Fred", middle="W", last="Smith"})
+
+val q42 = similar_names ([["Fred","Fredrick"],["Elizabeth","Betty"],["Freddie","Fred","F"]], {first="Fred", middle="W", last="Smith"}) =
+	    [{first="Fred", last="Smith", middle="W"}, {first="Fredrick", last="Smith", middle="W"},
+	     {first="Freddie", last="Smith", middle="W"}, {first="F", last="Smith", middle="W"}]
 
 
 (* val full_name = {first="Fred", middle="W", last="Smith"}
@@ -126,6 +161,5 @@ val qc1 = remove_card([(Clubs, Num 8),(Diamonds, Num 2),(Spades, Queen),(Spades,
 (* val qc2 = remove_card([(Clubs, Num 8),(Spades, Queen),(Spades, Ace),(Diamonds, Num 2)], (Diamonds, Num 3), IllegalMove) *)
 
 
-fun all_same_color(cs: card list)=
-    
+(* fun all_same_color(cs: card list)= *)
 
