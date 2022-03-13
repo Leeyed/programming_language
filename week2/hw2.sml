@@ -128,9 +128,9 @@ exception IllegalMove
 
 fun card_color(item: card)=
     case item of
-      (Clubs, _) => "black"
-    | (Spades, _) => "black"
-    |_ => "red"
+      (Clubs, _) => Black
+    | (Spades, _) => Black
+    |_ => Red
 
 val qa1 = card_color((Clubs, Num 8))
 val qa2 = card_color((Spades, Queen))
@@ -161,5 +161,108 @@ val qc1 = remove_card([(Clubs, Num 8),(Diamonds, Num 2),(Spades, Queen),(Spades,
 (* val qc2 = remove_card([(Clubs, Num 8),(Spades, Queen),(Spades, Ace),(Diamonds, Num 2)], (Diamonds, Num 3), IllegalMove) *)
 
 
-(* fun all_same_color(cs: card list)= *)
+fun all_same_color(cs: card list)=
+    let 
+      fun same_color(c: color, cs: card list)=
+            case cs of
+              [] => true
+            | x:: xs => if card_color(x) = c
+                        then same_color(c, xs)
+                        else false
+    in
+      case cs of 
+        [] => true
+      | x:: xs => same_color(card_color(x), xs)
+    end
+
+val qd1 = all_same_color([])
+val qd2 = all_same_color([(Clubs, Num 8)])
+val qd3 = all_same_color([(Clubs, Queen),(Spades, Ace)])
+val qd4 = all_same_color([(Clubs, Queen),(Spades, Ace), (Diamonds, Ace)])
+
+
+fun sum_cards(cs: card list)=
+    let 
+        fun local_sum(acc: int, cs: card list)=
+            case cs of
+              [] => acc
+            | x::xs => local_sum(acc+card_value(x), xs)
+    in
+      local_sum(0, cs)
+    end
+
+val qe1 = sum_cards([])
+val qe2 = sum_cards([(Clubs, Num 8)])
+val qe3 = sum_cards([(Clubs, Queen),(Spades, Ace)])
+val qe4 = sum_cards([(Clubs, Queen),(Spades, Ace), (Diamonds, Ace)])
+
+
+fun score(cs: card list, goal: int) = 
+    let 
+        val sum = sum_cards(cs)
+        val preliminary_score = if sum > goal
+                                then 3* (sum - goal)
+                                else goal - sum
+    in 
+        if all_same_color(cs)
+        then preliminary_score div 2
+        else preliminary_score
+    end
+
+val qf1 = score([(Clubs, Queen),(Spades, Ace), (Diamonds, Ace)], 10)
+
+fun officiate(cs: card list, ms: move list, goal: int) = 
+    let
+        fun status(hcs: card list, cs: card list, ms: move list)=
+            case ms of 
+              [] => score(hcs, goal)
+            | Discard(c)::m_xs => status(remove_card(hcs, c, IllegalMove), cs, m_xs)
+            | Draw::m_xs => case cs of 
+                              [] => score(hcs, goal)
+                            | x::xs => let 
+                                          val new_hcs = x::hcs
+                                          val sum = sum_cards(new_hcs)
+                                        in
+                                          if sum > goal
+                                          then score(new_hcs, goal)
+                                          else status(new_hcs, remove_card(cs, x, IllegalMove), m_xs)
+                                        end
+    in
+      status([], cs, ms)
+    end
+            
+val qf1 = score([(Clubs, Queen),(Spades, Ace), (Diamonds, Ace)], 10)         
+            
+
+
+
+
+
+(* datatype options = A|B|C|D *)
+
+
+
+
+(* 游戏规则
+1. 构成： 牌堆， 目标分数
+2. 玩家：初始化为空的手牌
+3. 玩家行动：
+          1. 从牌堆顶部摸一张加入自己手牌
+      OR  2. 从手牌中选择一张丢弃
+4. 结束：  1. 玩家选择不做任何行动
+      OR  2. 玩家手牌分数大于目标分数
+
+5. 目标： 以尽量低的分数结束
+6. 分数规则：
+          1. sum = 手牌分数总和
+          2. 当sum > goal 时，
+                preliminary score is three times (sum−goal)
+             否则
+                preliminary score is (goal − sum)
+          3. The score is the preliminary score 
+              unless all the held-cards are the same color,
+              in which case the score is the preliminary score divided by 2
+
+ *)
+
 
