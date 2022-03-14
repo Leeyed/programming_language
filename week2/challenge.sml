@@ -129,3 +129,99 @@ fun officiate_challenge(cs: card list, ms: move list, goal: int) =
     in
       status([], cs, ms)
     end
+
+
+
+fun careful_player(cs: card list, goal: int) =
+    let 
+        datatype suit = Clubs | Diamonds | Hearts | Spades
+        datatype rank = Jack | Queen | King | Ace | Num of int 
+        type card = suit * rank
+
+        datatype color = Red | Black
+        datatype move = Discard of card | Draw 
+
+        exception IllegalMove
+
+        (* put your solutions for problem 2 here *)
+
+        fun card_color(item: card)=
+            case item of
+            (Clubs, _) => Black
+            | (Spades, _) => Black
+            |_ => Red
+
+        fun card_value(item: card)=
+            case item of
+            (_, Num x) => x
+            | (_, Ace) => 11
+            |_ => 10
+
+        fun remove_card(cs: card list, c:card, exp)=
+            case cs of 
+            [] => raise exp
+            | x::xs => if x=c
+                        then xs
+                        else x::remove_card(xs, c, exp)
+
+        fun all_same_color(cs: card list)=
+            let 
+            fun same_color(c: color, cs: card list)=
+                    case cs of
+                    [] => true
+                    | x:: xs => if card_color(x) = c
+                                then same_color(c, xs)
+                                else false
+            in
+            case cs of 
+                [] => true
+            | x:: xs => same_color(card_color(x), xs)
+            end
+
+        fun sum_cards(cs: card list)=
+            let 
+                fun local_sum(acc: int, cs: card list)=
+                    case cs of
+                    [] => acc
+                    | x::xs => local_sum(acc+card_value(x), xs)
+            in
+            local_sum(0, cs)
+            end
+
+        fun score(cs: card list, goal: int) = 
+            let 
+                val sum = sum_cards(cs)
+                val preliminary_score = if sum > goal
+                                        then 3* (sum - goal)
+                                        else goal - sum
+            in 
+                if all_same_color(cs)
+                then preliminary_score div 2
+                else preliminary_score
+            end
+        
+        fun draw_flag(hcs: card list)=
+            if goal - score(hcs, goal) > 10
+            then true
+            else false
+        
+        fun get_moves(ms, cs)=
+            if score(cs, goal) = 0
+            then ms
+            else case cs of
+                    [] => ms
+                |x::[] => if goal - sum_cards(hcs) > 10
+                          then get_moves(ms@[Draw], remove_card(xs, x, IllegalMove))
+                          else 
+                              let  
+                                val s1 = score(cs, goal)
+                                val s2 = score(cs@[x], goal)
+                              in
+                                if s1<s2
+                                then s1
+                                else s2
+                              end
+                |x1::x2::xs => 
+
+    in
+    end
