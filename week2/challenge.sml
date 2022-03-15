@@ -131,19 +131,17 @@ fun officiate_challenge(cs: card list, ms: move list, goal: int) =
     end
 
 
-
-fun careful_player(cs: card list, goal: int) =
-    let 
-        datatype suit = Clubs | Diamonds | Hearts | Spades
+        (* datatype suit = Clubs | Diamonds | Hearts | Spades
         datatype rank = Jack | Queen | King | Ace | Num of int 
         type card = suit * rank
 
         datatype color = Red | Black
         datatype move = Discard of card | Draw 
 
-        exception IllegalMove
+        exception IllegalMove *)
 
-        (* put your solutions for problem 2 here *)
+(* fun careful_player(cs: card list, goal: int) =
+    let 
 
         fun card_color(item: card)=
             case item of
@@ -205,23 +203,28 @@ fun careful_player(cs: card list, goal: int) =
             then true
             else false
         
-        fun get_moves(ms, cs)=
-            if score(cs, goal) = 0
-            then ms
-            else case cs of
-                    [] => ms
-                |x::[] => if goal - sum_cards(hcs) > 10
-                          then get_moves(ms@[Draw], remove_card(xs, x, IllegalMove))
-                          else 
-                              let  
-                                val s1 = score(cs, goal)
-                                val s2 = score(cs@[x], goal)
-                              in
-                                if s1<s2
-                                then s1
-                                else s2
-                              end
-                |x1::x2::xs => 
-
+        
+        fun scoreZero(hs: card list, ts: card list, c:card, goal)=
+            case ts of
+                [] => if score(hs@[c], goal)=0
+                      then (true, hs@[c]) 
+                      else (false, hs)
+              | x::xs => if score(hs@xs@[c], goal) = 0
+                         then (true, hs@xs@[c])
+                         else  scoreZero(hs@[x], xs, c,goal)
+        
+        (* fun get_moves(hcs, ms, cs)=
+            case cs of
+                [] => ms
+            |x::xs => if goal - sum_cards(hcs) > 10
+                      then get_moves(hcs@[x], ms@[Draw], xs)
+                      else 
+                          case scoreZero([], cs, x,goal) of
+                              (true, ms) => ms
+                            | (false, _) => get_moves(hcs, ms@[Draw, Discard(x)], xs) *)
+          (* |x1::x2::xs =>  *)
     in
-    end
+        (* get_moves([], [], cs) *)
+        scoreZero([], [(Clubs,Ace),(Spades,2),(Clubs,Ace),(Spades,8)], (Spades,4), 34)
+    end *)
+  
