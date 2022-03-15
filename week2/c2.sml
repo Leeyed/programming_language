@@ -64,41 +64,21 @@ fun score(cs: card list, goal: int) =
         else preliminary_score
     end
 
-val c = (Spades,Num 4)
+(* val c = (Spades,Num 4) *)
 val goal = 14
 
-fun scoreZero(heads: card list, tails: card list)=
-            case tails of
-                [] => (false, heads)
-              (* | x::[] => 
-                            if score(heads@[c], goal)=0
-                            then (true, heads@[c])
-                            else (false, heads@[x]) *)
-                        (* let 
-                            val heads_c = heads@[c]
-                            val all_cards = heads_c
-                            val heads_x = heads@[x]
-                        in
-                            if score(all_cards, goal)=0
-                            then (true, all_cards)
-                            else scoreZero(heads_x, [])
-                        end *)
-              |x::xs => let 
-                            val heads_c = heads@[c]
-                            val all_cards = heads_c
-                            val heads_x = heads@[x]
-                        in
-                            if score(all_cards, goal)=0
-                            then (true, all_cards)
-                            else scoreZero(heads_x, xs)
-                        end
-              (* if score(heads@[c]@xs, goal)=0
-                        then (true, heads@[c]@xs)
-                        else scoreZero(x::heads, xs) *)
-
-                        (* if score((heads@[c])@xs, goal) = 0
-                         then (true, (heads@[c])@xs)
-                         else  scoreZero(heads@[x], xs) *)
+fun scoreZero(heads: card list, tails: card list, c:card)=
+    case tails of
+        [] => (false, c)
+    |x::xs => let 
+                  val heads_c = heads@[c]
+                  val all_cards = heads_c
+                  val heads_x = heads@[x]
+              in
+                  if score(all_cards, goal)=0
+                  then (true, x)
+                  else scoreZero(heads_x, xs)
+              end
 
 
 val ans = scoreZero([], [(Hearts, Num 2),(Clubs, Num 4), (Clubs, Num 4),(Clubs, Num 2)])

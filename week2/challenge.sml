@@ -41,21 +41,21 @@ fun all_same_color(cs: card list)=
     end
 
 
-fun get_new_num(old_socres, num)=
-    let
-        fun help(new_scores, old_scores, num)=
-            case old_scores of 
-            [] => new_scores
-            | x::xs => help(x+num::new_scores, xs, num)
-    in
-        help([], old_socres, num)
-    end
+
             
-
-
 
 fun sum_cards_challenge(cs: card list)=
     let 
+        fun get_new_num(old_socres, num)=
+            let
+                fun help(new_scores, old_scores, num)=
+                    case old_scores of 
+                    [] => new_scores
+                    | x::xs => help(x+num::new_scores, xs, num)
+            in
+                help([], old_socres, num)
+            end
+
         fun local_sum(acc: int list, cs: card list)=
             case cs of
               [] => acc
@@ -72,16 +72,18 @@ val qe2 = sum_cards_challenge([(Clubs, Num 8)])
 val qe3 = sum_cards_challenge([(Clubs, Queen),(Spades, Ace)])
 val qe4 = sum_cards_challenge([(Clubs, Queen),(Spades, Ace), (Diamonds, Ace)])
 
-fun get_min(min, ss)=
-    case ss of 
-        [] => min
-    |x::xs => if x<min
-                then get_min(x, xs)
-                else get_min(min, xs)
+
 
 
 fun score_challenge(cs: card list, goal: int) = 
     let 
+        fun get_min(min, ss)=
+            case ss of 
+                [] => min
+            |x::xs => if x<min
+                        then get_min(x, xs)
+                        else get_min(min, xs)
+                        
         val sums = sum_cards_challenge(cs)
         val same_color_flag = all_same_color(cs)
 
@@ -140,7 +142,7 @@ fun officiate_challenge(cs: card list, ms: move list, goal: int) =
 
         exception IllegalMove *)
 
-(* fun careful_player(cs: card list, goal: int) =
+fun careful_player(cs: card list, goal: int) =
     let 
 
         fun card_color(item: card)=
@@ -198,33 +200,71 @@ fun officiate_challenge(cs: card list, ms: move list, goal: int) =
                 else preliminary_score
             end
         
-        fun draw_flag(hcs: card list)=
-            if goal - score(hcs, goal) > 10
-            then true
-            else false
-        
-        
-        fun scoreZero(hs: card list, ts: card list, c:card, goal)=
+        (* fun couldZero(hs: card list, ts: card list, c:card, goal)=
             case ts of
                 [] => if score(hs@[c], goal)=0
                       then (true, hs@[c]) 
                       else (false, hs)
               | x::xs => if score(hs@xs@[c], goal) = 0
                          then (true, hs@xs@[c])
-                         else  scoreZero(hs@[x], xs, c,goal)
-        
-        (* fun get_moves(hcs, ms, cs)=
-            case cs of
-                [] => ms
-            |x::xs => if goal - sum_cards(hcs) > 10
-                      then get_moves(hcs@[x], ms@[Draw], xs)
-                      else 
-                          case scoreZero([], cs, x,goal) of
-                              (true, ms) => ms
-                            | (false, _) => get_moves(hcs, ms@[Draw, Discard(x)], xs) *)
-          (* |x1::x2::xs =>  *)
+                         else  scoreZero(hs@[x], xs, c,goal) *)
+
+        fun couldZero(heads: card list, tails: card list, c:card)=
+            case tails of
+                [] => (false, c)
+            |x::xs => let 
+                        val all_cards = heads@[c]@xs
+                        val heads_x = heads@[x]
+                    in
+                        if score(all_cards, goal)=0
+                        then (true, x)
+                        else couldZero(heads_x, xs, c)
+                    end
+
+        fun get_moves(hcs, ms, cs)=
+            if score(hcs,goal) = 0
+            then ms
+            else
+                case cs of
+                    [] => ms
+                |x::xs =>   let
+                                val new_hcs = hcs@[x]
+                                val new_s = score(new_hcs, goal)
+                            in
+                                if goal - sum_cards(hcs) > 10 orelse sum_cards(new_hcs) < goal
+                                then get_moves(new_hcs, ms@[Draw], xs)
+                                else 
+                                    case couldZero([], hcs, x) of
+                                        (true, c) => ms@[Discard(c), Draw]
+                                    | (false, _) => ms
+                            end
+
+            
+
     in
         (* get_moves([], [], cs) *)
-        scoreZero([], [(Clubs,Ace),(Spades,2),(Clubs,Ace),(Spades,8)], (Spades,4), 34)
-    end *)
+        (* scoreZero([], [(Clubs,Ace),(Spades,2),(Clubs,Ace),(Spades,8)], (Spades,4), 34) *)
+        get_moves([], [], cs)
+        (* couldZero([], [(Clubs,Jack),(Spades,Num 8), (Hearts,Num 6)], (Spades, Queen)) *)
+    end
   
+
+val card_list = [(Clubs,Jack),(Spades,Num 8), (Hearts,Num 6), (Spades, Queen), (Clubs,Num 2)]
+
+val q3b_1 = careful_player(card_list, 20)
+val q3b_2 = careful_player(card_list, 28)
+
+
+
+(* val goal = 28
+fun couldZero(heads: card list, tails: card list, c:card)=
+    case tails of
+        [] => (false, c)
+    |x::xs => let 
+                val all_cards = heads@[c]@xs
+                val heads_x = heads@[x]
+            in
+                if score(heads@[c]@xs, goal)=0
+                then (true, x)
+                else couldZero(heads@[x], xs, c)
+            end *)
